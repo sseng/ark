@@ -37,7 +37,7 @@ public class GameManager : MonoBehaviour {
         //Debug.Log(string.Format("Board width : {0} ", boardWidth));
     }
 
-	void Update () 
+	void LateUpdate () 
     {
         PaddleControl();
         

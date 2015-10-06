@@ -21,20 +21,25 @@ public class Brick : MonoBehaviour, IScoreable, IColorable {
     {
         if(m_hp > 1)
         {
-            addScore();
+            AddScore();
             m_hp--;
             UpdateColor();
         }
         else
         {
-            addScore();
+            AddScore();
             Destroy(this.gameObject);
         }
     }
-    //Interface methods
+
     public void Score(ScoreBoard score)
     {
         m_score = score;
+    }
+
+    public void AddScore()
+    {
+        m_score.Score += m_points;
     }
 
     public Color Colors(int index)
@@ -46,8 +51,7 @@ public class Brick : MonoBehaviour, IScoreable, IColorable {
         return m_colors[index];
     }
 
-    //class methods
-    void UpdateColor()
+    public void UpdateColor()
     {
         SetColor(Colors(m_hp));
     }
@@ -63,11 +67,6 @@ public class Brick : MonoBehaviour, IScoreable, IColorable {
             colors[i] = color;
         }
         mesh.colors = colors;
-    }
-
-    void addScore()
-    {
-        m_score.Score += m_points;
     }
 
     public void SetHp(int hp)
