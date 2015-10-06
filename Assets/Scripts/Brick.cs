@@ -1,36 +1,55 @@
 ﻿using UnityEngine;
-using System.Collections;
 
-public class Brick : MonoBehaviour {
-    private int m_hits = 2;
+public class Brick : MonoBehaviour, IScoreable, IColorable {
+    private int m_hp = 1;
     private Mesh m_mesh;
     private Vector3[] m_vertices;
+    private ScoreBoard m_score;
+    private int m_points = 10;
    
-    private Color[] m_colors = { Color.clear, Color.blue, Color.yellow, Color.green, Color.gray, Color.red };
+    private Color[] m_colors = { Color.gray, Color.red, Color.green, Color.blue, Color.yellow, Color.magenta, Color.cyan };
 
     void Start()
     {
-        UpdateColor();
-
-        //if (m_hits <= 0)
-        //{
-        //    Destroy(this.gameObject);
-        //}        
+        if (m_hp > 0)
+        {
+            UpdateColor();
+        }
     }
 
 	void OnCollisionEnter()
-    {        
-        m_hits--;
-        if (m_hits <= 0)
+    {
+        if(m_hp > 1)
         {
+            addScore();
+            m_hp--;
+            UpdateColor();
+        }
+        else
+        {
+            addScore();
             Destroy(this.gameObject);
         }
-        UpdateColor();
+    }
+    //Interface methods
+    public void Score(ScoreBoard score)
+    {
+        m_score = score;
     }
 
+    public Color Colors(int index)
+    {
+        if (index > m_colors.Length - 1)
+        {
+            return m_colors[m_colors.Length - 1];
+        }
+        return m_colors[index];
+    }
+
+    //class methods
     void UpdateColor()
     {
-        SetColor(Colors(m_hits));
+        SetColor(Colors(m_hp));
     }
 
     void SetColor(Color color)
@@ -46,18 +65,13 @@ public class Brick : MonoBehaviour {
         mesh.colors = colors;
     }
 
-    public void SetHits(int number)
+    void addScore()
     {
-        m_hits = number;
+        m_score.Score += m_points;
     }
 
-    Color Colors(int color)
+    public void SetHp(int hp)
     {
-        if (color > m_colors.Length - 1 )
-        {
-            //Debug.Log(m_colors.Length - 1);
-            return m_colors[m_colors.Length - 1];
-        }
-        return m_colors[color];
+        m_hp = hp;
     }
 }

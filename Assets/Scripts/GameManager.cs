@@ -1,13 +1,15 @@
 ﻿using UnityEngine;
-using System.Collections;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour {
 
     public GameObject rightWall, leftWall;
     public GameObject block;
+    public GameObject score;
     public int paddleSpeed = 2;
-
+    
     private int m_lives = 3;
+    private int m_blockHpRange = 4;
     private InputManager m_input = new InputManager();
     private PaddleController m_paddleCon;
     private GameObject m_ball;
@@ -16,6 +18,7 @@ public class GameManager : MonoBehaviour {
     private GameObject m_goBall;      
     private Rigidbody m_ballrb;
     private bool isBallActive;
+    private ScoreBoard m_scoreboard;
     
     void Start()
     {
@@ -25,9 +28,10 @@ public class GameManager : MonoBehaviour {
         m_goBrick = Resources.Load("Brick") as GameObject;
         m_goBall = Resources.Load("Ball") as GameObject;
 
-        InitializePaddle();
+        m_scoreboard = new ScoreBoard();
 
-        GenerateBlocks();
+        InitializePaddle();
+        GenerateBlocks(m_blockHpRange);
         SpawnBall();
 
         //Debug.Log(string.Format("Board width : {0} ", boardWidth));
@@ -36,6 +40,7 @@ public class GameManager : MonoBehaviour {
 	void Update () 
     {
         PaddleControl();
+        
 
         if (!isBallActive)
         {
@@ -48,6 +53,8 @@ public class GameManager : MonoBehaviour {
 
         else
         {
+            UpdateScore();
+
             if (BallOutOfBounds())
             {
                 Destroy(m_ball);
@@ -62,7 +69,7 @@ public class GameManager : MonoBehaviour {
         //Debug.Log(string.Format("Paddle width: {0} ", m_paddle.Width));        
 	}
 
-    void GenerateBlocks()
+    void GenerateBlocks(int blocksHp)
     {
         float blockWidth = block.transform.localScale.x;
         float blockHeight = block.transform.localScale.y;
@@ -81,22 +88,33 @@ public class GameManager : MonoBehaviour {
         Vector2[] rowOfBlocks = new Vector2[(int)maxBlocks];
         //Debug.Log(string.Format("rows: {0}", row1.Length));
 
-        int brickColorRange = 8;
-
         for (int i = 0; i < (int)maxRows; i++)
         {
             for (int j = 0; j < (int)maxBlocks; j++)
             {
-                int hits = Random.Range(0, brickColorRange);
+                int hits = Random.Range(0, blocksHp);
                 if (hits == 0)
                     continue;
 
                 rowOfBlocks[j] = new Vector2(x1 + j * (blockWidth + minOffset), y1 - i * (blockHeight + minOffset));
-                GameObject brick;
-                brick = Instantiate(m_goBrick, rowOfBlocks[j], Quaternion.identity) as GameObject;
-                brick.GetComponent<Brick>().SetHits(Random.Range(0, brickColorRange));
+                GameObject brick = Instantiate(m_goBrick, rowOfBlocks[j], Quaternion.identity) as GameObject;
+                Brick brickScript = brick.GetComponent<Brick>();
+                brickScript.SetHp(hits);
+                brickScript.Score(m_scoreboard);
             }
         }        
+    }
+
+    void UpdateScore()
+    {
+        if (score != null)
+        {
+            score.GetComponent<Text>().text = m_scoreboard.Score.ToString();
+        }
+        else
+        {
+            Debug.LogError("GameManager Score GameObject is null or not assigned");
+        }
     }
 
     void PaddleControl()
@@ -119,19 +137,12 @@ public class GameManager : MonoBehaviour {
         return rightWall.transform.position.x - (leftWall.transform.localScale.x / 2) - m_paddleCon.Width/2;
     }
 
-    float PaddleXPos()
-    {
-        return m_paddleCon.transform.position.x;
-    }
-
-    float PaddleYPos()
-    {
-        return m_paddleCon.transform.position.y;
-    }
-
     void SpawnBall()
     {
-        Vector2 paddlePos = new Vector2(PaddleXPos(), PaddleYPos() + m_paddleCon.Height);
+        float xPos = m_paddleCon.transform.position.x;
+        float yPos = m_paddleCon.transform.position.y;
+        Vector2 paddlePos = new Vector2(xPos, yPos + m_paddleCon.Height);
+
         m_ball = Instantiate(m_goBall, paddlePos, Quaternion.identity ) as GameObject;
         m_ballrb = m_ball.GetComponent<Rigidbody>();
         isBallActive = false;

@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System.Text;
 
 public class PaddleController : MonoBehaviour, IMoveable<Vector3> {
     private float m_speed = 1;
@@ -16,6 +14,7 @@ public class PaddleController : MonoBehaviour, IMoveable<Vector3> {
         get;
         set;
     }
+
     public float Speed
     {
         get
